@@ -1,0 +1,19 @@
+{
+  "schema_version": "qml.external-evidence.v1",
+  "source_project": "Path-AI-Engineer/51-vqc-qsvm-comparison-suite",
+  "upstream_schema": "quantum-arena.final-bundle-manifest.v1",
+  "source_manifest_sha256": "1539a588c94943d74aab4fe8b75eb912196c2518012f9cfa237a4cfbeb10fcdf",
+  "source_summary_sha256": "879770cfd5ef494bab1f85cc5e22ea191b6208fbb953fc1aaa60768a3af46080",
+  "status": "verified",
+  "protocol_state": "sealed",
+  "hardware_jobs": 0,
+  "quantum_advantage_claimed": false,
+  "summary": {
+    "dataset_count": 8,
+    "primary_method_count": 5,
+    "validation_run_count": 40,
+    "test_case_count": 40,
+    "failed_run_count": 0,
+    "universal_winner_claimed": false
+  }
+}

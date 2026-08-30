@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/benchmark-report.schema.json",
+  "title": "BenchmarkReport",
+  "type": "object",
+  "required": ["schema_version", "report_id", "plan_id", "snapshot_id", "protocol", "config_hash", "kernel_matrices", "runs", "aggregates", "limitations", "provenance"],
+  "properties": {
+    "schema_version": {"const": "qml.benchmark-report.v1"},
+    "config_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "protocol": {"$ref": "evaluation-protocol.schema.json"},
+    "kernel_matrices": {"type": "array", "minItems": 4, "items": {"$ref": "kernel-matrix.schema.json"}},
+    "runs": {"type": "array", "minItems": 4},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "provenance": {
+      "type": "object",
+      "required": ["dataset_sha256", "preprocessing_fitted_on", "sample_order_bound", "hardware_jobs", "quantum_advantage_claimed"],
+      "properties": {"quantum_advantage_claimed": {"const": false}}
+    }
+  }
+}

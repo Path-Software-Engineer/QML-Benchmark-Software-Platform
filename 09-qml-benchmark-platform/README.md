@@ -1,5 +1,35 @@
 # 09-qml-benchmark-hybrid-platform
 
+> Sprint 2 implementation: **Quantum Kernel Results Visualizer** — paired QSVM, bounded VQC,
+> classical baselines and checksum-bound kernel matrices on the Sprint 1 evidence foundation.
+
+## Sprint 2 quick start
+
+```powershell
+Set-Location "C:\JeanLoa\Path-Software-Engineer\QML-Benchmark-Software-Platform\09-qml-benchmark-platform"
+.\scripts\setup.ps1
+.\scripts\run-quality-gate.ps1
+```
+
+To inspect the running platform outside the self-cleaning gate:
+
+```powershell
+docker compose up --detach --build --wait
+```
+
+- Dashboard: <http://127.0.0.1:8050>
+- Swagger: <http://127.0.0.1:8080/docs>
+- OpenAPI: <http://127.0.0.1:8080/openapi.json>
+
+The Sprint 2 release does **not** claim quantum advantage. It compares four small models under one
+versioned protocol using a synthetic fixture and local statevector simulation. It reports paired
+seed variation, resources and limitations and requires no quantum hardware.
+
+See [Sprint 1 evidence](docs/sprints/sprint-01-evidence.md), the
+[Sprint 2 evidence](docs/sprints/sprint-02-evidence.md), [architecture](docs/architecture.md),
+[ADR 0001](docs/adr/0001-sprint-01-boundaries.md) and
+[ADR 0002](docs/adr/0002-sprint-02-comparison-protocol.md).
+
 ## 🧠 Descripción
 
 **QML Benchmark & Hybrid Platform** es una plataforma de software aplicada para explicar, comparar y visualizar fundamentos avanzados de **Quantum Machine Learning**.
@@ -408,5 +438,5 @@ Este proyecto debe demostrar que puedo convertir Quantum Machine Learning en una
 
 **Jean Franck Loa Rojas**
 
-Path Software Engineer Builder  
+Path Software Engineer Builder
 Quantum Machine Learning • Quantum Data Encoding • Quantum Kernels • QML Limitations • Benchmark Visualization • Hybrid AI-Quantum Platforms • Technical Storytelling

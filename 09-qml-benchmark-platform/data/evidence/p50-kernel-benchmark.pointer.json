@@ -1,0 +1,19 @@
+{
+  "schema_version": "qml.external-evidence.v1",
+  "source_project": "Path-AI-Engineer/50-quantum-kernel-benchmark",
+  "upstream_schema": "kernel-bench.final-bundle-manifest.v1",
+  "source_manifest_sha256": "d2b19f60d6c51fec536c6ae414be34e4ec9ddb5d8ecd51c761bb4ff01919cbdb",
+  "source_summary_sha256": "12069310519791a94e8a84b327f9a55653ddb071c725c623270e09912060d938",
+  "status": "verified",
+  "protocol_state": "sealed",
+  "hardware_jobs": 0,
+  "quantum_advantage_claimed": false,
+  "summary": {
+    "dataset_count": 8,
+    "kernel_count": 11,
+    "validation_run_count": 80,
+    "test_case_count": 32,
+    "negative_results_preserved": true,
+    "multiple_comparisons_disclosed": true
+  }
+}

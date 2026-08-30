@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/dataset-snapshot.schema.json",
+  "title": "DatasetSnapshot",
+  "type": "object",
+  "required": ["schema_version", "snapshot_id", "dataset_id", "content_hash", "split", "preprocessing"],
+  "properties": {
+    "schema_version": {"const": "qml.dataset-snapshot.v1"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "split": {
+      "type": "object",
+      "required": ["seed", "train_ids", "validation_ids", "test_ids"]
+    },
+    "preprocessing": {
+      "type": "object",
+      "required": ["method", "fitted_on", "means", "scales"],
+      "properties": {"fitted_on": {"const": "train"}}
+    }
+  }
+}

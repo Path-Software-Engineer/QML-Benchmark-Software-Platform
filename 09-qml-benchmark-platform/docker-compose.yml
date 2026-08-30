@@ -1,0 +1,89 @@
+name: qml-benchmark-platform
+
+services:
+  postgres:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: qml_benchmark
+      POSTGRES_USER: qml
+      POSTGRES_PASSWORD: local-qml-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qml -d qml_benchmark"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - qml-postgres-data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+
+  benchmark-api:
+    build:
+      context: .
+      dockerfile: deployment/api.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://qml:local-qml-only@postgres:5432/qml_benchmark
+      PROJECT_ROOT: /workspace
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=3)",
+        ]
+      interval: 3s
+      timeout: 4s
+      retries: 30
+
+  migrate:
+    image: postgres:17.6-bookworm
+    environment:
+      PGPASSWORD: local-qml-only
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./database/migrations:/migrations:ro
+    command:
+      - sh
+      - -ec
+      - |
+        for file in /migrations/*.sql; do
+          psql \
+            --host postgres \
+            --username qml \
+            --dbname qml_benchmark \
+            --set ON_ERROR_STOP=1 \
+            --file "$$file"
+        done
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: deployment/dashboard.Dockerfile
+    environment:
+      API_BASE_URL: http://benchmark-api:8080
+    depends_on:
+      benchmark-api:
+        condition: service_healthy
+    ports:
+      - "8050:8050"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8050', timeout=3)",
+        ]
+      interval: 3s
+      timeout: 4s
+      retries: 30
+
+volumes:
+  qml-postgres-data:

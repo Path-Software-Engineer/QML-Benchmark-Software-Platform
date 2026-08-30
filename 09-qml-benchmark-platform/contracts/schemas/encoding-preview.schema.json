@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/encoding-preview.schema.json",
+  "title": "EncodingPreview",
+  "type": "object",
+  "required": ["schema_version", "preview_id", "snapshot_id", "sample_id", "artifact", "adapters", "provenance"],
+  "properties": {
+    "schema_version": {"const": "qml.encoding-preview.v1"},
+    "preview_id": {"type": "string", "pattern": "^preview-[a-f0-9]{16}$"},
+    "artifact": {
+      "type": "object",
+      "required": ["encoding", "input_values", "statevector_real", "resources", "backend"],
+      "properties": {
+        "encoding": {"enum": ["basis", "angle", "amplitude"]},
+        "resources": {
+          "type": "object",
+          "required": ["qubits", "depth", "gates", "parameters", "state_dimension"]
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["created_at", "dataset_sha256", "preprocessing_fitted_on", "input_derivation", "deterministic"]
+    }
+  }
+}

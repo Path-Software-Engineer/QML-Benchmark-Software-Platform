@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/kernel-spec.schema.json",
+  "title": "KernelSpec",
+  "type": "object",
+  "required": ["schema_version", "kernel_id", "kind", "gamma", "degree", "coefficient", "backend"],
+  "properties": {
+    "schema_version": {"const": "qml.kernel-spec.v1"},
+    "kind": {"enum": ["linear", "polynomial", "rbf", "quantum-fidelity"]},
+    "gamma": {"type": "number", "exclusiveMinimum": 0},
+    "degree": {"type": "integer", "minimum": 2, "maximum": 3}
+  }
+}

@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;600&family=Fira+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  color-scheme: light;
+  --ink: #172033;
+  --muted: #5c6577;
+  --line: #d8deea;
+  --blue: #2563eb;
+  --navy: #0f2454;
+  --amber: #b45309;
+  --paper: #f4f7fb;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Fira Sans", sans-serif; }
+h1, h2, .metric strong { font-family: "Fira Code", monospace; }
+h1 { margin: .25rem 0 .75rem; font-size: clamp(2rem, 4vw, 3.8rem); max-width: 16ch; line-height: 1.02; }
+h2 { font-size: 1rem; margin: 0 0 1rem; }
+.hero { display: flex; justify-content: space-between; gap: 2rem; padding: 3rem max(1.25rem, calc((100vw - 1200px) / 2)); color: white; background: radial-gradient(circle at 80% 20%, #315da8, var(--navy) 55%); }
+.eyebrow { color: #a9c8ff; font: 600 .75rem "Fira Code", monospace; letter-spacing: .12em; }
+.lede { max-width: 62ch; color: #dce8ff; }
+.api-link { align-self: flex-start; color: white; border: 1px solid #7199d8; padding: .75rem 1rem; text-decoration: none; border-radius: .3rem; }
+main { max-width: 1200px; margin: -1.5rem auto 0; padding: 0 1.25rem 4rem; position: relative; }
+.panel, .metric { background: white; border: 1px solid var(--line); border-radius: .45rem; box-shadow: 0 8px 28px rgba(20, 38, 70, .06); }
+.panel { padding: 1.25rem; }
+.control-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+label { display: grid; gap: .5rem; font-weight: 600; }
+button { background: var(--blue); color: white; border: 0; border-radius: .3rem; padding: .8rem 1rem; font-weight: 700; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+.status { display: inline; margin-left: 1rem; color: var(--muted); }
+.metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: .8rem; margin: 1rem 0; }
+.metric { padding: 1rem; display: grid; gap: .35rem; }
+.metric-label { color: var(--muted); font-size: .78rem; }
+.metric strong { font-size: 1.4rem; }
+.evidence-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+.span-two { grid-column: span 2; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { text-align: left; padding: .65rem; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); }
+dl { display: grid; grid-template-columns: auto 1fr; gap: .6rem; overflow-wrap: anywhere; }
+dt { font-weight: 700; } dd { margin: 0; color: var(--muted); }
+.caution { border-left: 4px solid var(--amber); }
+.benchmark-launch { margin-top: 2rem; border-top: 4px solid #7b61ff; }
+.section-heading { max-width: 72ch; margin-bottom: 1rem; }
+.section-heading h2 { font-size: clamp(1.2rem, 2.4vw, 1.8rem); margin-bottom: .5rem; }
+.eyebrow.dark { color: #5540c9; }
+.benchmark-controls { align-items: end; }
+.benchmark-action { min-height: 74px; display: flex; align-items: center; gap: .75rem; }
+.status.block { display: block; margin: 0; }
+.benchmark-grid { margin-top: 1rem; }
+.compact { max-height: 24rem; overflow: auto; }
+.compact table { font-family: "Fira Code", monospace; font-size: .72rem; }
+.claim-boundary { color: #7c2d12; font-weight: 700; }
+.subheading { margin-top: 1.5rem; }
+button { transition: background-color 180ms ease, box-shadow 180ms ease; }
+button:hover { background: #1749b7; box-shadow: 0 4px 14px rgba(37, 99, 235, .22); }
+tbody tr:hover { background: #f1f5ff; }
+@media (max-width: 760px) {
+  .hero { display: block; padding-bottom: 3rem; }
+  .api-link { display: inline-block; margin-top: 1rem; }
+  .control-grid, .metrics, .evidence-grid { grid-template-columns: 1fr; }
+  .span-two { grid-column: auto; }
+  .status { display: block; margin: .75rem 0 0; }
+  .benchmark-action { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }

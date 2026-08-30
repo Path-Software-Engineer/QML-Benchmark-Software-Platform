@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qml-benchmark-platform"
+version = "0.2.0"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+  "dash==4.4.1",
+  "fastapi==0.141.1",
+  "httpx==0.28.1",
+  "jsonschema==4.25.1",
+  "numpy==2.3.2",
+  "pandas==2.3.2",
+  "pennylane==0.45.1",
+  "plotly==6.3.0",
+  "psycopg[binary]==3.2.9",
+  "pydantic==2.12.5",
+  "qiskit==2.5.2",
+  "requests==2.32.5",
+  "scikit-learn==1.7.1",
+  "uvicorn==0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy==1.17.1",
+  "pytest==8.4.2",
+  "ruff==0.12.12",
+  "types-requests==2.32.4.20250809",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "services/qml-core/src/qml_core",
+  "services/benchmark-api/src/benchmark_api",
+  "apps/dashboard/qml_dashboard",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests/python"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["benchmark_api", "qml_core", "qml_dashboard", "tests"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends"]
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+packages = ["benchmark_api", "qml_core"]
+mypy_path = [
+  "services/benchmark-api/src",
+  "services/qml-core/src",
+  "apps/dashboard",
+]
+
+[[tool.mypy.overrides]]
+module = [
+  "dash", "dash.*", "pandas", "pandas.*", "pennylane", "pennylane.*",
+  "plotly", "plotly.*", "psycopg", "psycopg.*", "qiskit", "qiskit.*",
+  "sklearn", "sklearn.*",
+]
+ignore_missing_imports = true

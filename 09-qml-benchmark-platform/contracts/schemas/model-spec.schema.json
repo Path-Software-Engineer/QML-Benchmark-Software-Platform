@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/model-spec.schema.json",
+  "title": "ModelSpec",
+  "type": "object",
+  "required": ["schema_version", "model_id", "kind", "max_iterations", "hyperparameter_trials"],
+  "properties": {
+    "schema_version": {"const": "qml.model-spec.v1"},
+    "kind": {"enum": ["logistic", "rbf-svm", "qsvm", "vqc"]},
+    "max_iterations": {"type": "integer", "minimum": 1, "maximum": 200},
+    "hyperparameter_trials": {"const": 1}
+  }
+}

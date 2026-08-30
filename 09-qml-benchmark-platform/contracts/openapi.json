@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "QML Benchmark Platform API",
+    "version": "0.2.0",
+    "description": "Sprint 2 reproducible encoding and paired kernel benchmark evidence; no quantum-advantage claim."
+  },
+  "servers": [{"url": "http://127.0.0.1:8080"}],
+  "paths": {
+    "/health/live": {"get": {"operationId": "live", "responses": {"200": {"description": "Live"}}}},
+    "/health/ready": {"get": {"operationId": "ready", "responses": {"200": {"description": "Ready"}, "503": {"description": "Repository unavailable"}}}},
+    "/api/v1/capabilities": {"get": {"operationId": "capabilities", "responses": {"200": {"description": "Release capabilities"}}}},
+    "/api/v1/encodings": {"get": {"operationId": "listEncodings", "responses": {"200": {"description": "Encoding catalog"}}}},
+    "/api/v1/datasets": {"get": {"operationId": "listDatasets", "responses": {"200": {"description": "Versioned datasets"}}}},
+    "/api/v1/datasets/snapshots": {"post": {"operationId": "createDatasetSnapshot", "responses": {"200": {"description": "Idempotent snapshot"}}}},
+    "/api/v1/datasets/snapshots/{snapshot_id}": {
+      "get": {
+        "operationId": "getDatasetSnapshot",
+        "parameters": [{"name": "snapshot_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Dataset snapshot"}, "404": {"description": "Not found"}}
+      }
+    },
+    "/api/v1/encodings/validate": {
+      "post": {
+        "operationId": "validateEncoding",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ValidationRequest"}}}},
+        "responses": {"200": {"description": "Valid encoding input"}, "422": {"description": "Invalid input"}}
+      }
+    },
+    "/api/v1/encodings/previews": {
+      "post": {
+        "operationId": "createEncodingPreview",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PreviewRequest"}}}},
+        "responses": {"200": {"description": "Executed and persisted preview"}, "422": {"description": "Invalid input"}}
+      }
+    },
+    "/api/v1/encodings/previews/{preview_id}": {
+      "get": {
+        "operationId": "getEncodingPreview",
+        "parameters": [{"name": "preview_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Persisted preview"}, "404": {"description": "Not found"}}
+      }
+    },
+    "/api/v1/encodings/previews/{preview_id}/manifest": {
+      "get": {
+        "operationId": "exportEvidenceManifest",
+        "parameters": [{"name": "preview_id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Digest-verifiable evidence bundle"}, "404": {"description": "Not found"}}
+      }
+    },
+    "/api/v1/benchmarks/protocol": {"get": {"operationId": "benchmarkProtocol", "responses": {"200": {"description": "Bounded evaluation protocol"}}}},
+    "/api/v1/benchmarks/kernels": {"get": {"operationId": "benchmarkKernels", "responses": {"200": {"description": "Allowlisted kernel registry"}}}},
+    "/api/v1/benchmarks/models": {"get": {"operationId": "benchmarkModels", "responses": {"200": {"description": "Allowlisted model registry"}}}},
+    "/api/v1/benchmarks/reports": {
+      "post": {
+        "operationId": "createBenchmarkReport",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BenchmarkRequest"}}}},
+        "responses": {"200": {"description": "Executed and persisted paired benchmark"}, "422": {"description": "Invalid or over-budget plan"}}
+      }
+    },
+    "/api/v1/benchmarks/reports/{report_id}": {"get": {"operationId": "getBenchmarkReport", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Benchmark report"}, "404": {"description": "Not found"}}}},
+    "/api/v1/benchmarks/reports/{report_id}/matrices/{matrix_id}": {"get": {"operationId": "getKernelMatrix", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}, {"name": "matrix_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Ordered kernel matrix"}, "404": {"description": "Not found"}}}},
+    "/api/v1/benchmarks/reports/{report_id}/report.csv": {"get": {"operationId": "exportBenchmarkCsv", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Reproducible CSV report"}}}},
+    "/api/v1/benchmarks/reports/{report_id}/report.html": {"get": {"operationId": "exportBenchmarkHtml", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Human-readable HTML report"}}}},
+    "/api/v1/evidence/imports": {
+      "get": {"operationId": "listEvidenceImports", "responses": {"200": {"description": "Accepted sealed evidence pointers"}}},
+      "post": {"operationId": "importEvidence", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EvidenceImportRequest"}}}}, "responses": {"200": {"description": "Idempotent import result"}, "422": {"description": "Rejected evidence"}}}
+    },
+    "/api/v1/evidence/imports/{import_id}": {"get": {"operationId": "getEvidenceImport", "parameters": [{"name": "import_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Accepted import"}, "404": {"description": "Not found"}}}}
+  },
+  "components": {
+    "schemas": {
+      "EncodingKind": {"type": "string", "enum": ["basis", "angle", "amplitude"]},
+      "ValidationRequest": {
+        "type": "object",
+        "required": ["encoding", "values"],
+        "properties": {
+          "encoding": {"$ref": "#/components/schemas/EncodingKind"},
+          "values": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "number"}}
+        }
+      },
+      "PreviewRequest": {
+        "type": "object",
+        "required": ["snapshot_id", "sample_id", "encoding"],
+        "properties": {
+          "snapshot_id": {"type": "string"},
+          "sample_id": {"type": "string"},
+          "encoding": {"$ref": "#/components/schemas/EncodingKind"},
+          "values": {"type": ["array", "null"], "maxItems": 8, "items": {"type": "number"}}
+        }
+      },
+      "BenchmarkRequest": {
+        "type": "object",
+        "required": ["snapshot_id"],
+        "properties": {
+          "snapshot_id": {"type": "string"},
+          "seeds": {"type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": {"type": "integer"}},
+          "vqc_iterations": {"type": "integer", "minimum": 1, "maximum": 8}
+        }
+      },
+      "EvidenceImportRequest": {
+        "type": "object",
+        "required": ["bundle"],
+        "properties": {"bundle": {"type": "object"}}
+      }
+    }
+  }
+}

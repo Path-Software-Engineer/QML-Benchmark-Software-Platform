@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/external-evidence.schema.json",
+  "title": "ExternalQmlEvidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_project", "upstream_schema", "source_manifest_sha256", "source_summary_sha256", "status", "protocol_state", "hardware_jobs", "quantum_advantage_claimed", "summary"],
+  "properties": {
+    "schema_version": {"const": "qml.external-evidence.v1"},
+    "source_project": {
+      "enum": [
+        "Path-AI-Engineer/50-quantum-kernel-benchmark",
+        "Path-AI-Engineer/51-vqc-qsvm-comparison-suite"
+      ]
+    },
+    "upstream_schema": {"enum": ["kernel-bench.final-bundle-manifest.v1", "quantum-arena.final-bundle-manifest.v1"]},
+    "source_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_summary_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"const": "verified"},
+    "protocol_state": {"const": "sealed"},
+    "hardware_jobs": {"type": "integer", "minimum": 0},
+    "quantum_advantage_claimed": {"const": false},
+    "summary": {"type": "object"}
+  }
+}

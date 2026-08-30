@@ -1,0 +1,12 @@
+{
+  "schema_version": "qml.dataset-manifest.v1",
+  "dataset_id": "qml-encoding-demo",
+  "version": "1.0.0",
+  "content_sha256": "79a25f597e2bb34ecd5f9d1f192710aeb42b31436fccea219a7e5a032a8116b2",
+  "source": "Repository-owned deterministic synthetic classification fixture",
+  "license": "CC0-1.0",
+  "feature_names": ["feature_1", "feature_2", "feature_3"],
+  "target_name": "label",
+  "intended_use": "Encoding visualization and deterministic acceptance tests only",
+  "limitations": "Synthetic data; not evidence of quantum or predictive advantage"
+}

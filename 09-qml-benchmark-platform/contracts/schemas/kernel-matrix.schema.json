@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/kernel-matrix.schema.json",
+  "title": "KernelMatrixArtifact",
+  "type": "object",
+  "required": ["schema_version", "matrix_id", "kernel", "sample_ids", "shape", "dtype", "values", "symmetric", "symmetry_error", "checksum", "resources", "projection_method", "projection_seed", "projection"],
+  "properties": {
+    "schema_version": {"const": "qml.kernel-matrix.v1"},
+    "sample_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "shape": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2},
+    "symmetric": {"const": true},
+    "checksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projection_method": {"const": "centered-kernel-pca"},
+    "projection_seed": {"const": 0},
+    "projection": {"type": "array", "minItems": 1}
+  }
+}
