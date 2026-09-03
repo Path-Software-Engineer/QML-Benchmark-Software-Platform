@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/workflow-integration-contract.schema.json",
+  "title": "WorkflowIntegrationContract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_id", "read_resources", "create_resources", "required_identity", "execution", "forbidden_inputs", "compatibility"],
+  "properties": {
+    "schema_version": {"const": "qml.workflow-integration-contract.v1"},
+    "contract_id": {"const": "project-09-v1"},
+    "read_resources": {"type": "array", "minItems": 3, "items": {"type": "string"}},
+    "create_resources": {"type": "array", "minItems": 2, "items": {"type": "string"}},
+    "required_identity": {"type": "array", "minItems": 4, "items": {"type": "string"}},
+    "execution": {"const": "bounded synchronous request only"},
+    "forbidden_inputs": {"type": "array", "minItems": 6, "items": {"type": "string"}},
+    "compatibility": {"type": "string", "minLength": 1}
+  }
+}

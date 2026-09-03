@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +18,7 @@ def _metric(label: str, identifier: str) -> html.Div:
     )
 
 
-def _shell() -> html.Div:
+def _shell(public_api_base_url: str) -> html.Div:
     return html.Div(
         [
             html.Header(
@@ -25,15 +26,19 @@ def _shell() -> html.Div:
                     html.Div(
                         [
                             html.P("PATH SOFTWARE ENGINEER · PROJECT 09", className="eyebrow"),
-                            html.H1("QML Evidence & Kernel Benchmark Console"),
+                            html.H1("QML Benchmark & Limitations Console"),
                             html.P(
-                                "Executed encodings, paired model runs and kernel matrices "
-                                "under one protocol — without a quantum-advantage claim.",
+                                "Executed encodings, paired model runs, noise profiles and "
+                                "mitigation evidence — without a quantum-advantage claim.",
                                 className="lede",
                             ),
                         ]
                     ),
-                    html.A("Open Swagger", href="http://127.0.0.1:8080/docs", className="api-link"),
+                    html.A(
+                        "Open Swagger",
+                        href=f"{public_api_base_url.rstrip('/')}/docs",
+                        className="api-link",
+                    ),
                 ],
                 className="hero",
             ),
@@ -271,8 +276,210 @@ def _shell() -> html.Div:
                         ],
                         className="evidence-grid benchmark-grid",
                     ),
+                    html.Section(
+                        [
+                            html.Div(
+                                [
+                                    html.P("SPRINT 3", className="eyebrow dark"),
+                                    html.H2("Quantum Noise Limitations Board"),
+                                    html.P(
+                                        "Compare ideal, finite-shot, noisy and readout-mitigated "
+                                        "QSVM runs while preserving the dataset, split, model, "
+                                        "seed and execution budget."
+                                    ),
+                                ],
+                                className="section-heading",
+                            ),
+                            html.Div(
+                                [
+                                    html.Label(
+                                        [
+                                            "Paired seeds",
+                                            dcc.Dropdown(
+                                                id="noise-repetitions",
+                                                options=[
+                                                    {"label": f"{value} seed(s)", "value": value}
+                                                    for value in (1, 2, 3, 4)
+                                                ],
+                                                value=3,
+                                                clearable=False,
+                                            ),
+                                        ]
+                                    ),
+                                    html.Label(
+                                        [
+                                            "Shots per kernel estimate",
+                                            dcc.Dropdown(
+                                                id="noise-shots",
+                                                options=[
+                                                    {"label": str(value), "value": value}
+                                                    for value in (64, 128, 256, 512, 1024)
+                                                ],
+                                                value=256,
+                                                clearable=False,
+                                            ),
+                                        ]
+                                    ),
+                                    html.Label(
+                                        [
+                                            "Depolarizing strength",
+                                            dcc.Slider(
+                                                id="noise-strength",
+                                                min=0,
+                                                max=0.25,
+                                                step=0.01,
+                                                value=0.08,
+                                                marks={0: "0", 0.1: "0.10", 0.25: "0.25"},
+                                            ),
+                                        ]
+                                    ),
+                                    html.Label(
+                                        [
+                                            "Readout error",
+                                            dcc.Slider(
+                                                id="readout-error",
+                                                min=0,
+                                                max=0.19,
+                                                step=0.01,
+                                                value=0.04,
+                                                marks={0: "0", 0.1: "0.10", 0.19: "0.19"},
+                                            ),
+                                        ]
+                                    ),
+                                    html.Label(
+                                        [
+                                            "Trainability depth",
+                                            dcc.Dropdown(
+                                                id="noise-depth",
+                                                options=[
+                                                    {"label": str(value), "value": value}
+                                                    for value in (2, 4, 6, 8)
+                                                ],
+                                                value=4,
+                                                clearable=False,
+                                            ),
+                                        ]
+                                    ),
+                                    html.Div(
+                                        [
+                                            html.Button(
+                                                "Run paired noise study",
+                                                id="run-noise",
+                                                n_clicks=0,
+                                            ),
+                                            html.P(
+                                                id="noise-status",
+                                                role="status",
+                                                className="status block",
+                                            ),
+                                        ],
+                                        className="benchmark-action",
+                                    ),
+                                ],
+                                className="control-grid noise-controls",
+                            ),
+                        ],
+                        className="panel noise-launch",
+                    ),
+                    html.Section(
+                        [
+                            _metric("Execution modes", "noise-modes"),
+                            _metric("Paired runs", "noise-runs"),
+                            _metric("Noisy F1 delta", "noise-f1-delta"),
+                            _metric("Mitigation F1 delta", "mitigation-f1-delta"),
+                            _metric("Hardware jobs", "noise-hardware"),
+                        ],
+                        className="metrics",
+                        **{"aria-label": "Noise limitations summary"},
+                    ),
+                    html.Div(
+                        [
+                            html.Section(
+                                [
+                                    html.H2("Quality by execution mode"),
+                                    dcc.Graph(
+                                        id="noise-quality-chart",
+                                        config={"displayModeBar": False},
+                                    ),
+                                    html.Div(id="noise-quality-table", className="table-wrap"),
+                                ],
+                                className="panel span-two",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Mitigation paired by seed"),
+                                    dcc.Graph(
+                                        id="mitigation-chart",
+                                        config={"displayModeBar": False},
+                                    ),
+                                    html.Div(id="mitigation-table", className="table-wrap"),
+                                ],
+                                className="panel",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Shots and runtime cost"),
+                                    dcc.Graph(
+                                        id="noise-resource-chart",
+                                        config={"displayModeBar": False},
+                                    ),
+                                    html.Div(id="noise-resource-table", className="table-wrap"),
+                                ],
+                                className="panel",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Trainability diagnostic proxy"),
+                                    html.P(
+                                        "Bounded analytic signal only; it does not establish or "
+                                        "exclude a barren plateau."
+                                    ),
+                                    dcc.Graph(
+                                        id="trainability-chart",
+                                        config={"displayModeBar": False},
+                                    ),
+                                    html.Div(id="trainability-table", className="table-wrap"),
+                                ],
+                                className="panel span-two",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Traceable limitation findings"),
+                                    html.Div(id="limitation-findings", className="finding-list"),
+                                ],
+                                className="panel span-two",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Protocol, provenance and export"),
+                                    html.Div(id="noise-provenance"),
+                                    html.Button(
+                                        "Download noise comparison CSV",
+                                        id="download-noise-report",
+                                        n_clicks=0,
+                                    ),
+                                    dcc.Download(id="noise-report-download"),
+                                ],
+                                className="panel span-two",
+                            ),
+                            html.Section(
+                                [
+                                    html.H2("Interpretation boundary"),
+                                    html.Ul(id="noise-limitations"),
+                                    html.P(
+                                        "Mitigation is not quantum error correction. These local "
+                                        "simulator results do not demonstrate quantum advantage.",
+                                        className="claim-boundary",
+                                    ),
+                                ],
+                                className="panel span-two caution",
+                            ),
+                        ],
+                        className="evidence-grid noise-grid",
+                    ),
                     dcc.Store(id="preview-store"),
                     dcc.Store(id="benchmark-store"),
+                    dcc.Store(id="noise-store"),
                 ]
             ),
         ]
@@ -290,7 +497,8 @@ def create_dash_app(client: BenchmarkApiClient | None = None) -> Dash:
     api = client or BenchmarkApiClient()
     assets = Path(__file__).parents[1] / "assets"
     application = Dash(__name__, title="QML Encoding Visualizer", assets_folder=str(assets))
-    application.layout = _shell()
+    public_api_base_url = os.getenv("PUBLIC_API_BASE_URL", "http://127.0.0.1:8080")
+    application.layout = _shell(public_api_base_url)
 
     @application.callback(
         Output("dataset", "options"),
@@ -664,6 +872,310 @@ def create_dash_app(client: BenchmarkApiClient | None = None) -> Dash:
             return None
         return {
             "content": api.report_csv(str(data["report_id"])),
+            "filename": f"{data['report_id']}.csv",
+            "type": "text/csv",
+        }
+
+    @application.callback(
+        Output("noise-store", "data"),
+        Output("noise-status", "children"),
+        Input("run-noise", "n_clicks"),
+        State("dataset", "value"),
+        State("noise-repetitions", "value"),
+        State("noise-shots", "value"),
+        State("noise-strength", "value"),
+        State("readout-error", "value"),
+        State("noise-depth", "value"),
+        prevent_initial_call=True,
+    )
+    def run_noise_study(
+        _: int,
+        snapshot_id: str,
+        repetitions: int,
+        shots: int,
+        noise_strength: float,
+        readout_error: float,
+        max_depth: int,
+    ) -> tuple[dict[str, Any], str]:
+        seeds = [3501, 3502, 3503, 3504][:repetitions]
+        report = api.noise_report(
+            snapshot_id,
+            seeds,
+            shots,
+            noise_strength,
+            readout_error,
+            max_depth,
+        )
+        return report, f"Completed and persisted as {report['report_id']}"
+
+    @application.callback(
+        Output("noise-modes", "children"),
+        Output("noise-runs", "children"),
+        Output("noise-f1-delta", "children"),
+        Output("mitigation-f1-delta", "children"),
+        Output("noise-hardware", "children"),
+        Output("noise-quality-chart", "figure"),
+        Output("noise-quality-table", "children"),
+        Output("mitigation-chart", "figure"),
+        Output("mitigation-table", "children"),
+        Output("noise-resource-chart", "figure"),
+        Output("noise-resource-table", "children"),
+        Output("trainability-chart", "figure"),
+        Output("trainability-table", "children"),
+        Output("limitation-findings", "children"),
+        Output("noise-provenance", "children"),
+        Output("noise-limitations", "children"),
+        Input("noise-store", "data"),
+    )
+    def render_noise_study(data: dict[str, Any] | None) -> tuple[Any, ...]:
+        empty = go.Figure().update_layout(template="plotly_white", height=320)
+        if not data:
+            return (
+                "—",
+                "—",
+                "—",
+                "—",
+                "—",
+                empty,
+                "Run the paired noise study.",
+                empty,
+                "Run the paired noise study.",
+                empty,
+                "Run the paired noise study.",
+                empty,
+                "Run the paired noise study.",
+                "No findings yet.",
+                "No report persisted yet.",
+                [],
+            )
+        modes = ["ideal", "shot-based", "noisy", "mitigated"]
+        f1_summary = {
+            item["execution_mode"]: item for item in data["uncertainty"] if item["metric"] == "f1"
+        }
+        means = [float(f1_summary[mode]["mean"]) for mode in modes]
+        upper = [
+            float(f1_summary[mode]["interval_high"]) - float(f1_summary[mode]["mean"])
+            for mode in modes
+        ]
+        lower = [
+            float(f1_summary[mode]["mean"]) - float(f1_summary[mode]["interval_low"])
+            for mode in modes
+        ]
+        quality = go.Figure(
+            go.Bar(
+                x=modes,
+                y=means,
+                error_y={"type": "data", "array": upper, "arrayminus": lower},
+                marker_color=["#1E40AF", "#3B82F6", "#F59E0B", "#0F766E"],
+            )
+        )
+        quality.update_layout(
+            template="plotly_white",
+            height=320,
+            yaxis={"title": "Mean F1 and descriptive 95% interval", "range": [0, 1.05]},
+            margin={"l": 44, "r": 18, "t": 20, "b": 54},
+        )
+        quality_table = _table(
+            [
+                "Mode",
+                "Mean F1",
+                "Std",
+                "Interval low",
+                "Interval high",
+                "Mean kernel MAE",
+            ],
+            [
+                [
+                    mode,
+                    f"{float(f1_summary[mode]['mean']):.3f}",
+                    f"{float(f1_summary[mode]['standard_deviation']):.3f}",
+                    f"{float(f1_summary[mode]['interval_low']):.3f}",
+                    f"{float(f1_summary[mode]['interval_high']):.3f}",
+                    "{:.4f}".format(
+                        next(
+                            float(item["mean"])
+                            for item in data["uncertainty"]
+                            if item["execution_mode"] == mode
+                            and item["metric"] == "kernel_mae_from_ideal"
+                        )
+                    ),
+                ]
+                for mode in modes
+            ],
+        )
+        noisy_runs = {
+            int(run["seed"]): run
+            for run in data["runs"]
+            if run["profile"]["execution_mode"] == "noisy"
+        }
+        mitigated_runs = {
+            int(run["seed"]): run
+            for run in data["runs"]
+            if run["profile"]["execution_mode"] == "mitigated"
+        }
+        seeds = sorted(noisy_runs)
+        mitigation = go.Figure()
+        for mode, selected, color in (
+            ("noisy", noisy_runs, "#F59E0B"),
+            ("mitigated", mitigated_runs, "#0F766E"),
+        ):
+            mitigation.add_bar(
+                name=mode,
+                x=[str(seed) for seed in seeds],
+                y=[float(selected[seed]["metrics"]["f1"]) for seed in seeds],
+                marker_color=color,
+            )
+        mitigation.update_layout(
+            template="plotly_white",
+            barmode="group",
+            height=320,
+            yaxis={"title": "F1", "range": [0, 1.05]},
+            xaxis_title="Paired seed",
+            margin={"l": 44, "r": 18, "t": 20, "b": 54},
+        )
+        mitigation_table = _table(
+            ["Seed", "Noisy F1", "Mitigated F1", "Paired delta"],
+            [
+                [
+                    str(seed),
+                    f"{float(noisy_runs[seed]['metrics']['f1']):.3f}",
+                    f"{float(mitigated_runs[seed]['metrics']['f1']):.3f}",
+                    "{:+.3f}".format(
+                        float(mitigated_runs[seed]["metrics"]["f1"])
+                        - float(noisy_runs[seed]["metrics"]["f1"])
+                    ),
+                ]
+                for seed in seeds
+            ],
+        )
+        runtime_by_mode = {
+            mode: sum(
+                float(run["resources"]["runtime_seconds"])
+                for run in data["runs"]
+                if run["profile"]["execution_mode"] == mode
+            )
+            / len(seeds)
+            for mode in modes
+        }
+        resources = go.Figure(
+            go.Bar(
+                x=modes,
+                y=[runtime_by_mode[mode] for mode in modes],
+                marker_color="#7C3AED",
+            )
+        )
+        resources.update_layout(
+            template="plotly_white",
+            height=320,
+            yaxis_title="Mean wall-clock seconds",
+            margin={"l": 44, "r": 18, "t": 20, "b": 54},
+        )
+        profile_by_mode = {profile["execution_mode"]: profile for profile in data["profiles"]}
+        resource_table = _table(
+            ["Mode", "Shots", "Mean runtime (s)", "Calibration shots"],
+            [
+                [
+                    mode,
+                    str(profile_by_mode[mode]["shots"]),
+                    f"{runtime_by_mode[mode]:.5f}",
+                    str(data["mitigation"]["calibration_shots"] if mode == "mitigated" else 0),
+                ]
+                for mode in modes
+            ],
+        )
+        diagnostics = data["trainability"]
+        trainability = go.Figure(
+            go.Scatter(
+                x=[item["depth"] for item in diagnostics],
+                y=[item["gradient_norm_mean"] for item in diagnostics],
+                mode="lines+markers",
+                line={"color": "#1E40AF", "width": 3},
+            )
+        )
+        trainability.update_layout(
+            template="plotly_white",
+            height=320,
+            xaxis_title="Circuit depth",
+            yaxis_title="Mean proxy gradient norm",
+            margin={"l": 50, "r": 18, "t": 20, "b": 54},
+        )
+        trainability_table = _table(
+            ["Depth", "Mean norm", "Variance", "Near-zero fraction"],
+            [
+                [
+                    str(item["depth"]),
+                    f"{float(item['gradient_norm_mean']):.6f}",
+                    f"{float(item['gradient_norm_variance']):.6f}",
+                    f"{float(item['near_zero_fraction']):.3f}",
+                ]
+                for item in diagnostics
+            ],
+        )
+        findings = [
+            html.Article(
+                [
+                    html.Div(
+                        [
+                            html.Strong(finding["title"]),
+                            html.Span(
+                                f"{finding['severity']} · {finding['status']}",
+                                className=f"finding-badge {finding['severity']}",
+                            ),
+                        ],
+                        className="finding-heading",
+                    ),
+                    html.P(finding["observation"]),
+                    html.Ul([html.Li(item) for item in finding["caveats"]]),
+                    html.Small(f"Evidence: {', '.join(finding['evidence_links'])}"),
+                ],
+                className="finding-card",
+            )
+            for finding in data["findings"]
+        ]
+        provenance = html.Dl(
+            [
+                html.Dt("Comparison ID"),
+                html.Dd(data["comparison_id"]),
+                html.Dt("Dataset SHA-256"),
+                html.Dd(data["provenance"]["dataset_sha256"]),
+                html.Dt("Paired factors"),
+                html.Dd(", ".join(data["provenance"]["paired_factors"])),
+                html.Dt("Mitigation scope"),
+                html.Dd(data["mitigation"]["applicability"]),
+            ]
+        )
+        noisy_delta = means[modes.index("noisy")] - means[modes.index("ideal")]
+        mitigation_delta = means[modes.index("mitigated")] - means[modes.index("noisy")]
+        return (
+            len(modes),
+            len(data["runs"]),
+            f"{noisy_delta:+.3f}",
+            f"{mitigation_delta:+.3f}",
+            data["provenance"]["hardware_jobs"],
+            quality,
+            quality_table,
+            mitigation,
+            mitigation_table,
+            resources,
+            resource_table,
+            trainability,
+            trainability_table,
+            findings,
+            provenance,
+            [html.Li(item) for item in data["limitations"]],
+        )
+
+    @application.callback(
+        Output("noise-report-download", "data"),
+        Input("download-noise-report", "n_clicks"),
+        State("noise-store", "data"),
+        prevent_initial_call=True,
+    )
+    def download_noise_report(_: int, data: dict[str, Any] | None) -> dict[str, Any] | None:
+        if not data:
+            return None
+        return {
+            "content": api.noise_report_csv(str(data["report_id"])),
             "filename": f"{data['report_id']}.csv",
             "type": "text/csv",
         }

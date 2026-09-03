@@ -74,5 +74,37 @@ class BenchmarkApiClient:
         response.raise_for_status()
         return response.text
 
+    def noise_report(
+        self,
+        snapshot_id: str,
+        seeds: list[int],
+        shots: int,
+        noise_strength: float,
+        readout_error: float,
+        max_depth: int,
+    ) -> dict[str, Any]:
+        return dict(
+            self._request(
+                "POST",
+                "/api/v1/noise/reports",
+                json={
+                    "snapshot_id": snapshot_id,
+                    "seeds": seeds,
+                    "shots": shots,
+                    "noise_strength": noise_strength,
+                    "readout_error": readout_error,
+                    "max_depth": max_depth,
+                },
+            )
+        )
+
+    def noise_report_csv(self, report_id: str) -> str:
+        response = requests.get(
+            f"{self.base_url}/api/v1/noise/reports/{report_id}/report.csv",
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.text
+
     def evidence_imports(self) -> list[dict[str, Any]]:
         return list(self._request("GET", "/api/v1/evidence/imports"))

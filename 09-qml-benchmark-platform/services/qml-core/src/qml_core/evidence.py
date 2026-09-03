@@ -8,6 +8,7 @@ from typing import Any
 ALLOWED_UPSTREAM_SCHEMAS = {
     "kernel-bench.final-bundle-manifest.v1",
     "quantum-arena.final-bundle-manifest.v1",
+    "hybrid-opt.bundle-manifest.v1",
 }
 FORBIDDEN_KEYS = {"code", "notebook", "pickle", "plugin", "python", "qasm"}
 KNOWN_EVIDENCE: dict[str, dict[str, Any]] = {
@@ -41,6 +42,22 @@ KNOWN_EVIDENCE: dict[str, dict[str, Any]] = {
             "test_case_count": 40,
             "failed_run_count": 0,
             "universal_winner_claimed": False,
+        },
+    },
+    "Path-AI-Engineer/52-vqe-qaoa-advanced-optimization": {
+        "source_manifest_sha256": (
+            "473d57f2b890b472fc5149a49068ee3b243c206bdd30415c83dac603fe24e86b"
+        ),
+        "source_summary_sha256": (
+            "262f89a9a06e0474ce34d630ff2ded8396601f6f66dc7681052189f41468ad0c"
+        ),
+        "summary": {
+            "final_case_count": 30,
+            "run_count": 150,
+            "profile_study_count": 6,
+            "trainability_study_count": 4,
+            "failed_run_count": 0,
+            "post_test_tuning": False,
         },
     },
 }
@@ -80,7 +97,7 @@ def validate_evidence_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
     if bundle["status"] != "verified" or bundle["protocol_state"] != "sealed":
         raise ValueError("only verified evidence from a sealed protocol can be imported")
     if bundle["quantum_advantage_claimed"] is not False:
-        raise ValueError("bundles asserting quantum advantage are outside Sprint 2 scope")
+        raise ValueError("bundles asserting quantum advantage are outside the release scope")
     if not isinstance(bundle["hardware_jobs"], int) or bundle["hardware_jobs"] < 0:
         raise ValueError("hardware_jobs must be a non-negative integer")
     for field in ("source_manifest_sha256", "source_summary_sha256"):

@@ -10,10 +10,17 @@
     "source_project": {
       "enum": [
         "Path-AI-Engineer/50-quantum-kernel-benchmark",
-        "Path-AI-Engineer/51-vqc-qsvm-comparison-suite"
+        "Path-AI-Engineer/51-vqc-qsvm-comparison-suite",
+        "Path-AI-Engineer/52-vqe-qaoa-advanced-optimization"
       ]
     },
-    "upstream_schema": {"enum": ["kernel-bench.final-bundle-manifest.v1", "quantum-arena.final-bundle-manifest.v1"]},
+    "upstream_schema": {
+      "enum": [
+        "kernel-bench.final-bundle-manifest.v1",
+        "quantum-arena.final-bundle-manifest.v1",
+        "hybrid-opt.bundle-manifest.v1"
+      ]
+    },
     "source_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "source_summary_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "status": {"const": "verified"},

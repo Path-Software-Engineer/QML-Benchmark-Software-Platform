@@ -20,3 +20,15 @@ def test_external_evidence_pointers_conform_to_the_versioned_contract() -> None:
     validator = Draft202012Validator(schema)
     for path in (ROOT / "data/evidence").glob("*.pointer.json"):
         validator.validate(json.loads(path.read_text(encoding="utf-8")))
+
+
+def test_p53_source_assessment_is_explicitly_non_importable() -> None:
+    schema = json.loads(
+        (ROOT / "contracts/schemas/source-assessment.schema.json").read_text(encoding="utf-8")
+    )
+    assessment = json.loads(
+        (ROOT / "data/evidence/p53-noise-limitations.assessment.json").read_text(encoding="utf-8")
+    )
+    Draft202012Validator(schema).validate(assessment)
+    assert assessment["importable"] is False
+    assert assessment["executable_content_imported"] is False

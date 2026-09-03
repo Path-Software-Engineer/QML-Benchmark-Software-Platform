@@ -1,0 +1,10 @@
+{
+  "schema_version": "qml.source-assessment.v1",
+  "source_project": "Path-AI-Engineer/53-quantum-noise-and-qml-limitations-lab",
+  "status": "conceptual-only",
+  "importable": false,
+  "reason": "No sealed versioned evidence bundle was present; only README.md was observed.",
+  "observed_artifacts": ["README.md"],
+  "quantum_advantage_claimed": false,
+  "executable_content_imported": false
+}

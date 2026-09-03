@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.0] - 2026-08-31
+
+### Added
+
+- Sprint 3 Quantum Noise Limitations Board with four paired execution modes.
+- Deterministic finite-shot, bounded depolarizing/readout and scoped mitigation pipeline.
+- Typed profiles, findings, calibration, uncertainty and workflow integration contracts.
+- PostgreSQL noise report persistence plus JSON, CSV and HTML API surfaces.
+- P52 sealed evidence pointer and explicit non-importable P53 source assessment.
+- Accessible uncertainty, mitigation, resource and trainability views with data tables.
+- Sprint 3 threat model, operations runbook and cross-layer quality gate.
+- Azure Container Apps scale-to-zero recruiter release with shared environment reuse and
+  same-origin Dashboard, API, Swagger and OpenAPI routing.
+
 ## [0.2.0] - 2026-08-29
 
 ### Added

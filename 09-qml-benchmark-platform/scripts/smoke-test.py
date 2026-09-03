@@ -54,8 +54,9 @@ def main() -> None:
         assert response.status == 200
     with urllib.request.urlopen(f"{DASHBOARD}/_dash-layout", timeout=30) as response:
         layout = response.read().decode()
-        assert "QML Evidence & Kernel Benchmark Console" in layout
+        assert "QML Benchmark & Limitations Console" in layout
         assert "Responsible interpretation" in layout
+        assert "Quantum Noise Limitations Board" in layout
 
     report = request(
         "/api/v1/benchmarks/reports",
@@ -72,7 +73,7 @@ def main() -> None:
     persisted = request(f"/api/v1/benchmarks/reports/{report['report_id']}")
     assert persisted["config_hash"] == report["config_hash"]
     imports = request("/api/v1/evidence/imports")
-    assert len(imports) == 2
+    assert len(imports) == 3
 
     with urllib.request.urlopen(
         f"{API}/api/v1/benchmarks/reports/{report['report_id']}/report.csv",
@@ -80,10 +81,40 @@ def main() -> None:
     ) as response:
         assert "model_id,repetitions,metric" in response.read().decode()
 
+    noise_report = request(
+        "/api/v1/noise/reports",
+        {
+            "snapshot_id": snapshot_id,
+            "seeds": [3501],
+            "shots": 64,
+            "noise_strength": 0.08,
+            "readout_error": 0.04,
+            "max_depth": 2,
+        },
+    )
+    assert {profile["execution_mode"] for profile in noise_report["profiles"]} == {
+        "ideal",
+        "shot-based",
+        "noisy",
+        "mitigated",
+    }
+    assert len(noise_report["runs"]) == 4
+    assert len(noise_report["findings"]) == 4
+    assert noise_report["provenance"]["hardware_jobs"] == 0
+    persisted_noise = request(f"/api/v1/noise/reports/{noise_report['report_id']}")
+    assert persisted_noise["comparison_id"] == noise_report["comparison_id"]
+    workflow = request("/api/v1/integration/workflow-contract")
+    assert workflow["schema_version"] == "qml.workflow-integration-contract.v1"
+    with urllib.request.urlopen(
+        f"{API}/api/v1/noise/reports/{noise_report['report_id']}/report.csv",
+        timeout=30,
+    ) as response:
+        assert "run_id,mode,seed,shots" in response.read().decode()
+
     print(
-        "OK - Sprint 2 cross-layer smoke passed: Sprint 1 encodings plus four kernels, "
-        "paired model runs, PostgreSQL report persistence, sealed imports, CSV export "
-        "and Dash comparison surface"
+        "OK - Sprint 3 cross-layer smoke passed: encodings, paired kernels, four noise "
+        "modes, mitigation scope, PostgreSQL persistence, traceable findings, exports "
+        "and the Dash limitations board"
     )
 
 

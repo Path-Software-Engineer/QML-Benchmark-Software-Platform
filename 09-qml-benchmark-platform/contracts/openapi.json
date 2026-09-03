@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "QML Benchmark Platform API",
-    "version": "0.2.0",
-    "description": "Sprint 2 reproducible encoding and paired kernel benchmark evidence; no quantum-advantage claim."
+    "version": "1.0.0",
+    "description": "Sprint 3 reproducible encoding, paired kernel, noise, and mitigation evidence; no quantum-advantage or error-correction claim."
   },
   "servers": [{"url": "http://127.0.0.1:8080"}],
   "paths": {
@@ -62,6 +62,19 @@
     "/api/v1/benchmarks/reports/{report_id}/matrices/{matrix_id}": {"get": {"operationId": "getKernelMatrix", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}, {"name": "matrix_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Ordered kernel matrix"}, "404": {"description": "Not found"}}}},
     "/api/v1/benchmarks/reports/{report_id}/report.csv": {"get": {"operationId": "exportBenchmarkCsv", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Reproducible CSV report"}}}},
     "/api/v1/benchmarks/reports/{report_id}/report.html": {"get": {"operationId": "exportBenchmarkHtml", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Human-readable HTML report"}}}},
+    "/api/v1/noise/profiles": {"get": {"operationId": "noiseProfiles", "responses": {"200": {"description": "Allowlisted execution profiles"}}}},
+    "/api/v1/noise/mitigations": {"get": {"operationId": "noiseMitigations", "responses": {"200": {"description": "Allowlisted mitigation specifications"}}}},
+    "/api/v1/noise/reports": {
+      "post": {
+        "operationId": "createNoiseReport",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/NoiseReportRequest"}}}},
+        "responses": {"200": {"description": "Executed paired noise limitations report"}, "422": {"description": "Invalid or over-budget protocol"}}
+      }
+    },
+    "/api/v1/noise/reports/{report_id}": {"get": {"operationId": "getNoiseReport", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Persisted noise limitations report"}, "404": {"description": "Not found"}}}},
+    "/api/v1/noise/reports/{report_id}/report.csv": {"get": {"operationId": "exportNoiseCsv", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Machine-readable paired run report"}}}},
+    "/api/v1/noise/reports/{report_id}/report.html": {"get": {"operationId": "exportNoiseHtml", "parameters": [{"name": "report_id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "Human-readable limitations report"}}}},
+    "/api/v1/integration/workflow-contract": {"get": {"operationId": "workflowIntegrationContract", "responses": {"200": {"description": "Stable workflow integration contract"}}}},
     "/api/v1/evidence/imports": {
       "get": {"operationId": "listEvidenceImports", "responses": {"200": {"description": "Accepted sealed evidence pointers"}}},
       "post": {"operationId": "importEvidence", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EvidenceImportRequest"}}}}, "responses": {"200": {"description": "Idempotent import result"}, "422": {"description": "Rejected evidence"}}}
@@ -96,6 +109,18 @@
           "snapshot_id": {"type": "string"},
           "seeds": {"type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": {"type": "integer"}},
           "vqc_iterations": {"type": "integer", "minimum": 1, "maximum": 8}
+        }
+      },
+      "NoiseReportRequest": {
+        "type": "object",
+        "required": ["snapshot_id"],
+        "properties": {
+          "snapshot_id": {"type": "string"},
+          "seeds": {"type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true, "items": {"type": "integer"}},
+          "shots": {"type": "integer", "minimum": 64, "maximum": 2048},
+          "noise_strength": {"type": "number", "minimum": 0, "maximum": 0.25},
+          "readout_error": {"type": "number", "minimum": 0, "exclusiveMaximum": 0.2},
+          "max_depth": {"type": "integer", "minimum": 1, "maximum": 8}
         }
       },
       "EvidenceImportRequest": {

@@ -1,0 +1,23 @@
+{
+	auto_https off
+	admin off
+}
+
+:8088 {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+	}
+
+	@api path /api/* /health/* /openapi.json /docs /docs/ /docs/* /redoc /redoc/ /redoc/*
+	handle @api {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:8050
+	}
+}

@@ -49,6 +49,18 @@ dt { font-weight: 700; } dd { margin: 0; color: var(--muted); }
 .benchmark-action { min-height: 74px; display: flex; align-items: center; gap: .75rem; }
 .status.block { display: block; margin: 0; }
 .benchmark-grid { margin-top: 1rem; }
+.noise-launch { margin-top: 2rem; border-top: 4px solid #f59e0b; }
+.noise-controls { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+.noise-grid { margin-top: 1rem; }
+.finding-list { display: grid; gap: .8rem; }
+.finding-card { border: 1px solid var(--line); border-left: 4px solid #3b82f6; padding: 1rem; }
+.finding-card p { margin: .65rem 0; }
+.finding-card ul { color: var(--muted); }
+.finding-card small { color: var(--muted); overflow-wrap: anywhere; }
+.finding-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.finding-badge { border-radius: 999px; padding: .25rem .55rem; background: #dbeafe; color: #1e3a8a; font: 600 .72rem "Fira Code", monospace; white-space: nowrap; }
+.finding-badge.medium { background: #fef3c7; color: #78350f; }
+.finding-badge.high { background: #fee2e2; color: #7f1d1d; }
 .compact { max-height: 24rem; overflow: auto; }
 .compact table { font-family: "Fira Code", monospace; font-size: .72rem; }
 .claim-boundary { color: #7c2d12; font-weight: 700; }
@@ -63,5 +75,7 @@ tbody tr:hover { background: #f1f5ff; }
   .span-two { grid-column: auto; }
   .status { display: block; margin: .75rem 0 0; }
   .benchmark-action { align-items: flex-start; flex-direction: column; }
+  .noise-controls { grid-template-columns: 1fr; }
+  .finding-heading { align-items: flex-start; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }

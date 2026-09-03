@@ -1,9 +1,9 @@
 # 09-qml-benchmark-hybrid-platform
 
-> Sprint 2 implementation: **Quantum Kernel Results Visualizer** — paired QSVM, bounded VQC,
-> classical baselines and checksum-bound kernel matrices on the Sprint 1 evidence foundation.
+> Sprint 3 release candidate: **Quantum Noise Limitations Board** — ideal, finite-shot, noisy
+> and readout-mitigated QSVM evidence on the same immutable dataset, split, model and seeds.
 
-## Sprint 2 quick start
+## Sprint 3 quick start
 
 ```powershell
 Set-Location "C:\JeanLoa\Path-Software-Engineer\QML-Benchmark-Software-Platform\09-qml-benchmark-platform"
@@ -21,14 +21,35 @@ docker compose up --detach --build --wait
 - Swagger: <http://127.0.0.1:8080/docs>
 - OpenAPI: <http://127.0.0.1:8080/openapi.json>
 
-The Sprint 2 release does **not** claim quantum advantage. It compares four small models under one
-versioned protocol using a synthetic fixture and local statevector simulation. It reports paired
-seed variation, resources and limitations and requires no quantum hardware.
+## Azure recruiter demo
+
+The Azure path reuses the existing Central US Container Apps environment and deploys one
+Consumption app with `minReplicas: 0` and `maxReplicas: 1`. It creates no ACR, managed database,
+Azure Files, storage account or Log Analytics workspace.
+
+```powershell
+Set-Location "C:\JeanLoa\Path-Software-Engineer\QML-Benchmark-Software-Platform\09-qml-benchmark-platform"
+.\scripts\deploy-azure.ps1
+```
+
+That command performs read-only inventory, Bicep compilation, validation and what-if. Publication
+requires the verified release tag, process-scoped GHCR credentials and explicit `-Apply`.
+
+Cloud-created reports live in replica memory and reset after scale-to-zero or replacement. The
+architecture has zero fixed Azure resources, but free grants are usage limits rather than an
+absolute guarantee of a zero bill.
+
+The Sprint 3 release does **not** claim quantum advantage or quantum error correction. It retains
+the four-model Sprint 2 comparison and adds a bounded local channel simulator, finite-shot
+sampling, symmetric readout inversion, uncertainty, runtime, calibration evidence and typed
+limitation findings. No quantum hardware is required.
 
 See [Sprint 1 evidence](docs/sprints/sprint-01-evidence.md), the
-[Sprint 2 evidence](docs/sprints/sprint-02-evidence.md), [architecture](docs/architecture.md),
+[Sprint 2 evidence](docs/sprints/sprint-02-evidence.md), the
+[Sprint 3 evidence](docs/sprints/sprint-03-evidence.md), [architecture](docs/architecture.md),
 [ADR 0001](docs/adr/0001-sprint-01-boundaries.md) and
-[ADR 0002](docs/adr/0002-sprint-02-comparison-protocol.md).
+[ADR 0002](docs/adr/0002-sprint-02-comparison-protocol.md) and
+[ADR 0003](docs/adr/0003-sprint-03-noise-limitations.md).
 
 ## 🧠 Descripción
 
@@ -352,7 +373,8 @@ Este proyecto puede generar:
 
 ## 🚀 Estado actual
 
-Pendiente / por iniciar.
+Sprint 3 implementado como release candidate local. El cierre y tag final requieren que el
+quality gate completo termine en verde en Docker Desktop.
 
 ---
 

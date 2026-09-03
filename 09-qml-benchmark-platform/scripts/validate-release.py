@@ -34,19 +34,40 @@ def main() -> None:
         "contracts/schemas/kernel-matrix.schema.json",
         "contracts/schemas/benchmark-report.schema.json",
         "contracts/schemas/external-evidence.schema.json",
+        "contracts/schemas/noise-profile.schema.json",
+        "contracts/schemas/mitigation-spec.schema.json",
+        "contracts/schemas/limitation-finding.schema.json",
+        "contracts/schemas/noise-limitations-report.schema.json",
+        "contracts/schemas/workflow-integration-contract.schema.json",
+        "contracts/schemas/source-assessment.schema.json",
         "contracts/openapi.json",
         "data/evidence/p50-kernel-benchmark.pointer.json",
         "data/evidence/p51-vqc-qsvm-comparison.pointer.json",
+        "data/evidence/p52-vqe-qaoa-optimization.pointer.json",
+        "data/evidence/p53-noise-limitations.assessment.json",
         "services/qml-core/src/qml_core/kernels.py",
         "services/qml-core/src/qml_core/evaluation.py",
         "services/qml-core/src/qml_core/benchmark.py",
         "services/qml-core/src/qml_core/evidence.py",
         "database/migrations/0002_sprint_02_kernel_benchmarks.sql",
+        "services/qml-core/src/qml_core/noise.py",
+        "services/qml-core/src/qml_core/noise_models.py",
+        "database/migrations/0003_sprint_03_noise_limitations.sql",
         "docs/adr/0001-sprint-01-boundaries.md",
         "docs/adr/0002-sprint-02-comparison-protocol.md",
         "docs/sprints/sprint-01-evidence.md",
         "docs/sprints/sprint-02-evidence.md",
-        "design-system/qml-benchmark-platform-sprint-2/MASTER.md",
+        "docs/adr/0003-sprint-03-noise-limitations.md",
+        "docs/sprints/sprint-03-evidence.md",
+        "docs/runbooks/sprint-03-operations.md",
+        "docs/security/sprint-03-threat-model.md",
+        "design-system/qml-benchmark-platform-sprint-3/MASTER.md",
+        "deployment/gateway.Dockerfile",
+        "infra/azure/Caddyfile",
+        "infra/azure/main.bicep",
+        "infra/azure/workload.bicep",
+        "scripts/deploy-azure.ps1",
+        "scripts/validate-azure-release.py",
         "docker-compose.yml",
     ]
     for item in required:
@@ -64,6 +85,16 @@ def main() -> None:
         if pointer["quantum_advantage_claimed"] or pointer["status"] != "verified":
             raise SystemExit(f"unacceptable external evidence pointer: {pointer_path.name}")
 
+    assessment_schema = json.loads(
+        require("contracts/schemas/source-assessment.schema.json").read_text(encoding="utf-8")
+    )
+    assessment = json.loads(
+        require("data/evidence/p53-noise-limitations.assessment.json").read_text(encoding="utf-8")
+    )
+    Draft202012Validator(assessment_schema).validate(assessment)
+    if assessment["importable"] or assessment["executable_content_imported"]:
+        raise SystemExit("P53 conceptual assessment must not be imported as executable evidence")
+
     openapi = json.loads(require("contracts/openapi.json").read_text(encoding="utf-8"))
     required_paths = {
         "/api/v1/benchmarks/protocol",
@@ -71,6 +102,10 @@ def main() -> None:
         "/api/v1/benchmarks/models",
         "/api/v1/benchmarks/reports",
         "/api/v1/evidence/imports",
+        "/api/v1/noise/reports",
+        "/api/v1/noise/profiles",
+        "/api/v1/noise/mitigations",
+        "/api/v1/integration/workflow-contract",
     }
     if openapi.get("openapi") != "3.1.0" or not required_paths.issubset(openapi["paths"]):
         raise SystemExit("OpenAPI 3.1 contract is incomplete")
@@ -94,12 +129,17 @@ def main() -> None:
         or "evidence_imports" not in sprint_two_migration
     ):
         raise SystemExit("Sprint 2 persistence tables are incomplete")
+    sprint_three_migration = require(
+        "database/migrations/0003_sprint_03_noise_limitations.sql"
+    ).read_text(encoding="utf-8")
+    if "noise_reports" not in sprint_three_migration:
+        raise SystemExit("Sprint 3 persistence table is incomplete")
 
     readme = require("README.md").read_text(encoding="utf-8")
     if "quantum advantage" not in readme.lower():
         raise SystemExit("README must state the quantum-advantage evidence boundary")
 
-    print("OK - Sprint 2 contracts, boundaries and versioned assets are structurally complete")
+    print("OK - Sprint 3 contracts, boundaries and versioned assets are structurally complete")
 
 
 if __name__ == "__main__":

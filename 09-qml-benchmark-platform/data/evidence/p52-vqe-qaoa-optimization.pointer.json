@@ -1,0 +1,19 @@
+{
+  "schema_version": "qml.external-evidence.v1",
+  "source_project": "Path-AI-Engineer/52-vqe-qaoa-advanced-optimization",
+  "upstream_schema": "hybrid-opt.bundle-manifest.v1",
+  "source_manifest_sha256": "473d57f2b890b472fc5149a49068ee3b243c206bdd30415c83dac603fe24e86b",
+  "source_summary_sha256": "262f89a9a06e0474ce34d630ff2ded8396601f6f66dc7681052189f41468ad0c",
+  "status": "verified",
+  "protocol_state": "sealed",
+  "hardware_jobs": 0,
+  "quantum_advantage_claimed": false,
+  "summary": {
+    "final_case_count": 30,
+    "run_count": 150,
+    "profile_study_count": 6,
+    "trainability_study_count": 4,
+    "failed_run_count": 0,
+    "post_test_tuning": false
+  }
+}

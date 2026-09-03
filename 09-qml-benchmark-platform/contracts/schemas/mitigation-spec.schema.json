@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/mitigation-spec.schema.json",
+  "title": "MitigationSpec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mitigation_id", "method", "calibration_shots", "regularization", "applicability"],
+  "properties": {
+    "schema_version": {"const": "qml.mitigation-spec.v1"},
+    "mitigation_id": {"type": "string", "minLength": 1},
+    "method": {"const": "symmetric-readout-inversion"},
+    "calibration_shots": {"type": "integer", "minimum": 64, "maximum": 4096},
+    "regularization": {"type": "number", "minimum": 0, "maximum": 0.1},
+    "applicability": {"type": "string", "minLength": 1}
+  }
+}

@@ -20,6 +20,10 @@ class EvidenceRepository(Protocol):
 
     def get_report(self, report_id: str) -> dict[str, Any] | None: ...
 
+    def save_noise_report(self, report_id: str, payload: Mapping[str, Any]) -> None: ...
+
+    def get_noise_report(self, report_id: str) -> dict[str, Any] | None: ...
+
     def save_import(self, import_id: str, payload: Mapping[str, Any]) -> None: ...
 
     def get_import(self, import_id: str) -> dict[str, Any] | None: ...
@@ -32,6 +36,7 @@ class MemoryEvidenceRepository:
         self.snapshots: dict[str, dict[str, Any]] = {}
         self.previews: dict[str, dict[str, Any]] = {}
         self.reports: dict[str, dict[str, Any]] = {}
+        self.noise_reports: dict[str, dict[str, Any]] = {}
         self.imports: dict[str, dict[str, Any]] = {}
 
     def save_snapshot(self, snapshot_id: str, payload: Mapping[str, Any]) -> None:
@@ -51,6 +56,12 @@ class MemoryEvidenceRepository:
 
     def get_report(self, report_id: str) -> dict[str, Any] | None:
         return self.reports.get(report_id)
+
+    def save_noise_report(self, report_id: str, payload: Mapping[str, Any]) -> None:
+        self.noise_reports[report_id] = dict(payload)
+
+    def get_noise_report(self, report_id: str) -> dict[str, Any] | None:
+        return self.noise_reports.get(report_id)
 
     def save_import(self, import_id: str, payload: Mapping[str, Any]) -> None:
         self.imports[import_id] = dict(payload)
@@ -129,6 +140,24 @@ class PostgresEvidenceRepository:
 
     def get_report(self, report_id: str) -> dict[str, Any] | None:
         return self._get("SELECT payload FROM benchmark_reports WHERE report_id = %s", report_id)
+
+    def save_noise_report(self, report_id: str, payload: Mapping[str, Any]) -> None:
+        self._execute(
+            """
+            INSERT INTO noise_reports (report_id, comparison_id, snapshot_id, payload)
+            VALUES (%s, %s, %s, %s::jsonb)
+            ON CONFLICT (report_id) DO UPDATE SET payload = EXCLUDED.payload
+            """,
+            (
+                report_id,
+                str(payload["comparison_id"]),
+                str(payload["snapshot_id"]),
+                json.dumps(payload),
+            ),
+        )
+
+    def get_noise_report(self, report_id: str) -> dict[str, Any] | None:
+        return self._get("SELECT payload FROM noise_reports WHERE report_id = %s", report_id)
 
     def save_import(self, import_id: str, payload: Mapping[str, Any]) -> None:
         self._execute(

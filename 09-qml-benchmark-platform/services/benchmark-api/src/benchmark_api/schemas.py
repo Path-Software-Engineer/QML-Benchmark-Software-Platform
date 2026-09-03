@@ -49,3 +49,19 @@ class BenchmarkRequest(BaseModel):
 
 class EvidenceImportRequest(BaseModel):
     bundle: dict[str, Any]
+
+
+class NoiseReportRequest(BaseModel):
+    snapshot_id: str
+    seeds: list[int] = Field(default=[3501, 3502, 3503], min_length=1, max_length=4)
+    shots: int = Field(default=256, ge=64, le=2048)
+    noise_strength: float = Field(default=0.08, ge=0.0, le=0.25)
+    readout_error: float = Field(default=0.04, ge=0.0, lt=0.2)
+    max_depth: int = Field(default=4, ge=1, le=8)
+
+    @field_validator("seeds")
+    @classmethod
+    def require_unique_noise_seeds(cls, value: list[int]) -> list[int]:
+        if len(set(value)) != len(value):
+            raise ValueError("noise benchmark seeds must be unique")
+        return value

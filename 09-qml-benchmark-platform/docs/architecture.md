@@ -1,4 +1,4 @@
-# Sprint 1 architecture
+# QML benchmark platform architecture
 
 ```text
 Versioned CSV + manifest
@@ -45,3 +45,25 @@ Dash heatmap + matrix table + variability + resource board
 The `migrate` service applies every idempotent migration before FastAPI starts, including when the
 Sprint 1 PostgreSQL volume already exists. Verified P50/P51 evidence enters through a separate
 data-only importer; it never adds executable code to the runtime.
+
+## Sprint 3 limitations vertical
+
+```text
+NoiseProtocol + fixed Sprint 2 fidelity kernel
+                 |
+                 v
+ideal / finite-shot / noisy / readout-mitigated execution
+                 | paired dataset + split + model + seeds + budget
+                 v
+QSVM metrics + uncertainty + runtime + calibration + depth proxy
+                 |
+                 v
+PostgreSQL NoiseLimitationsReport -> JSON / CSV / HTML
+                 |
+                 v HTTP only
+Dash quality + mitigation + resource + trainability + findings board
+```
+
+The profile registry and request bounds prevent arbitrary execution. Project 52 contributes a
+digest-verified data pointer. Project 53 is recorded as conceptual-only because no sealed evidence
+bundle was available; it is not loaded into the runtime evidence registry.

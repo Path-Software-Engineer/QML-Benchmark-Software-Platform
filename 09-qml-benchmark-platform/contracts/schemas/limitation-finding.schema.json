@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/limitation-finding.schema.json",
+  "title": "LimitationFinding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "finding_id", "severity", "scope", "title", "observation", "evidence_links", "caveats", "status"],
+  "properties": {
+    "schema_version": {"const": "qml.limitation-finding.v1"},
+    "finding_id": {"type": "string", "minLength": 1},
+    "severity": {"enum": ["low", "medium", "high"]},
+    "scope": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "observation": {"type": "string", "minLength": 1},
+    "evidence_links": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "caveats": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "status": {"enum": ["observed", "not-observed", "inconclusive"]}
+  }
+}

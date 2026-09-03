@@ -25,6 +25,8 @@ def test_capabilities_are_honest_and_hardware_independent() -> None:
     payload = client().get("/api/v1/capabilities").json()
     assert payload["quantum_hardware_required"] is False
     assert payload["quantum_advantage_claim"] is False
+    assert payload["error_correction_claim"] is False
+    assert payload["release"] == "sprint-3"
     assert payload["encodings"] == ["basis", "angle", "amplitude"]
 
 
@@ -87,10 +89,10 @@ def test_benchmark_report_is_persisted_and_exported_in_three_formats() -> None:
     assert "no quantum-advantage claim" in html_export.text
 
 
-def test_sealed_p50_and_p51_evidence_is_preloaded_idempotently() -> None:
+def test_sealed_p50_p51_and_p52_evidence_is_preloaded_idempotently() -> None:
     current = client()
     imports = current.get("/api/v1/evidence/imports").json()
-    assert len(imports) == 2
+    assert len(imports) == 3
     assert {item["status"] for item in imports} == {"accepted"}
     bundle = json.loads(
         (ROOT / "data/evidence/p50-kernel-benchmark.pointer.json").read_text(encoding="utf-8")
@@ -98,3 +100,43 @@ def test_sealed_p50_and_p51_evidence_is_preloaded_idempotently() -> None:
     first = current.post("/api/v1/evidence/imports", json={"bundle": bundle}).json()
     second = current.post("/api/v1/evidence/imports", json={"bundle": bundle}).json()
     assert first == second
+
+
+def test_noise_report_is_persisted_exported_and_integration_ready() -> None:
+    current = client()
+    snapshot_id = current.get("/api/v1/datasets").json()[0]["snapshot_id"]
+    response = current.post(
+        "/api/v1/noise/reports",
+        json={
+            "snapshot_id": snapshot_id,
+            "seeds": [3501],
+            "shots": 64,
+            "noise_strength": 0.08,
+            "readout_error": 0.04,
+            "max_depth": 2,
+        },
+    )
+    assert response.status_code == 200
+    report = response.json()
+    assert len(report["profiles"]) == 4
+    assert len(report["runs"]) == 4
+    assert len(report["findings"]) == 4
+    assert report["provenance"]["hardware_jobs"] == 0
+    report_id = report["report_id"]
+    assert current.get(f"/api/v1/noise/reports/{report_id}").status_code == 200
+    csv_export = current.get(f"/api/v1/noise/reports/{report_id}/report.csv")
+    assert "run_id,mode,seed,shots" in csv_export.text
+    html_export = current.get(f"/api/v1/noise/reports/{report_id}/report.html")
+    assert "no quantum-advantage or error-correction claim" in html_export.text
+    contract = current.get("/api/v1/integration/workflow-contract").json()
+    assert contract["schema_version"] == "qml.workflow-integration-contract.v1"
+
+
+def test_noise_budget_validation_returns_422() -> None:
+    current = client()
+    snapshot_id = current.get("/api/v1/datasets").json()[0]["snapshot_id"]
+    response = current.post(
+        "/api/v1/noise/reports",
+        json={"snapshot_id": snapshot_id, "seeds": [1], "shots": 4096},
+    )
+    assert response.status_code == 422

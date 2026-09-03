@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import html as html_stdlib
 import io
 import json
 from dataclasses import asdict, replace
@@ -19,6 +20,7 @@ from benchmark_api.repository import (
 from benchmark_api.schemas import (
     BenchmarkRequest,
     EvidenceImportRequest,
+    NoiseReportRequest,
     PreviewRequest,
     PreviewResponse,
     ValidationRequest,
@@ -33,6 +35,13 @@ from qml_core.encodings import encode
 from qml_core.evaluation import model_registry
 from qml_core.evidence import validate_evidence_bundle
 from qml_core.kernels import kernel_registry
+from qml_core.noise import (
+    mitigation_registry,
+    noise_profile_registry,
+    run_noise_limitations,
+    workflow_integration_contract,
+)
+from qml_core.noise_models import NoiseProtocol
 
 
 def create_app(
@@ -57,9 +66,9 @@ def create_app(
 
     application = FastAPI(
         title="QML Benchmark Platform API",
-        version="0.2.0",
+        version="1.0.0",
         description=(
-            "Executed encoding and paired kernel/model benchmark evidence. "
+            "Executed encoding, paired kernel/model, and noise-limitation evidence. "
             "This release makes no quantum-advantage claim."
         ),
     )
@@ -92,13 +101,15 @@ def create_app(
     def capabilities() -> dict[str, Any]:
         return {
             "schema_version": "qml.capabilities.v1",
-            "release": "sprint-2",
+            "release": "sprint-3",
             "encodings": [item["id"] for item in encoding_catalog()],
             "execution": ["numpy-reference", "qiskit-statevector", "pennylane-default.qubit"],
             "quantum_hardware_required": False,
             "quantum_advantage_claim": False,
             "benchmark_models": [spec.model_id for spec in model_registry(EvaluationProtocol())],
             "kernel_specs": [spec.kernel_id for spec in kernel_registry()],
+            "noise_modes": [profile.execution_mode for profile in noise_profile_registry()],
+            "error_correction_claim": False,
         }
 
     @application.get("/api/v1/encodings", tags=["catalog"])
@@ -343,6 +354,133 @@ def create_app(
             f"<table><tr><th>Model</th><th>Mean F1</th><th>Std</th></tr>{rows}</table>"
             f"<h2>Limitations</h2><ul>{limitations}</ul></html>"
         )
+
+    @application.get("/api/v1/noise/profiles", tags=["noise-limitations"])
+    def noise_profiles() -> list[dict[str, Any]]:
+        return [profile.as_dict() for profile in noise_profile_registry()]
+
+    @application.get("/api/v1/noise/mitigations", tags=["noise-limitations"])
+    def noise_mitigations() -> list[dict[str, Any]]:
+        return [spec.as_dict() for spec in mitigation_registry()]
+
+    @application.post("/api/v1/noise/reports", tags=["noise-limitations"])
+    def create_noise_report(
+        request: NoiseReportRequest,
+        current: PreparedDataset = Depends(get_dataset),
+        storage: EvidenceRepository = Depends(get_repository),
+    ) -> dict[str, Any]:
+        if request.snapshot_id != current.snapshot.snapshot_id:
+            raise HTTPException(status_code=404, detail="snapshot not found")
+        protocol = NoiseProtocol(
+            seeds=tuple(request.seeds),
+            shots=request.shots,
+            noise_strength=request.noise_strength,
+            readout_error=request.readout_error,
+            max_depth=request.max_depth,
+        )
+        report = run_noise_limitations(current, protocol)
+        payload = report.as_dict()
+        storage.save_noise_report(report.report_id, payload)
+        return payload
+
+    @application.get("/api/v1/noise/reports/{report_id}", tags=["noise-limitations"])
+    def get_noise_report(
+        report_id: str,
+        storage: EvidenceRepository = Depends(get_repository),
+    ) -> dict[str, Any]:
+        payload = storage.get_noise_report(report_id)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="noise report not found")
+        return payload
+
+    @application.get(
+        "/api/v1/noise/reports/{report_id}/report.csv",
+        response_class=PlainTextResponse,
+        tags=["exports"],
+    )
+    def export_noise_csv(
+        report_id: str,
+        storage: EvidenceRepository = Depends(get_repository),
+    ) -> str:
+        payload = storage.get_noise_report(report_id)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="noise report not found")
+        stream = io.StringIO()
+        writer = csv.writer(stream, lineterminator="\n")
+        writer.writerow(
+            [
+                "run_id",
+                "mode",
+                "seed",
+                "shots",
+                "runtime_seconds",
+                "accuracy",
+                "f1",
+                "roc_auc",
+                "f1_delta_from_ideal",
+            ]
+        )
+        for run in payload["runs"]:
+            writer.writerow(
+                [
+                    run["run_id"],
+                    run["profile"]["execution_mode"],
+                    run["seed"],
+                    run["resources"]["shots"],
+                    run["resources"]["runtime_seconds"],
+                    run["metrics"]["accuracy"],
+                    run["metrics"]["f1"],
+                    run["metrics"]["roc_auc"],
+                    run["deltas_from_ideal"]["f1"],
+                ]
+            )
+        return stream.getvalue()
+
+    @application.get(
+        "/api/v1/noise/reports/{report_id}/report.html",
+        response_class=HTMLResponse,
+        tags=["exports"],
+    )
+    def export_noise_html(
+        report_id: str,
+        storage: EvidenceRepository = Depends(get_repository),
+    ) -> str:
+        payload = storage.get_noise_report(report_id)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="noise report not found")
+        rows = "".join(
+            "<tr><td>{}</td><td>{}</td><td>{:.3f}</td><td>{:+.3f}</td></tr>".format(
+                html_stdlib.escape(str(run["profile"]["execution_mode"])),
+                int(run["seed"]),
+                float(run["metrics"]["f1"]),
+                float(run["deltas_from_ideal"]["f1"]),
+            )
+            for run in payload["runs"]
+        )
+        findings = "".join(
+            "<li><strong>{}</strong>: {}</li>".format(
+                html_stdlib.escape(str(finding["title"])),
+                html_stdlib.escape(str(finding["observation"])),
+            )
+            for finding in payload["findings"]
+        )
+        limitations = "".join(
+            f"<li>{html_stdlib.escape(str(item))}</li>" for item in payload["limitations"]
+        )
+        return (
+            "<!doctype html><html lang='en'><meta charset='utf-8'>"
+            f"<title>{html_stdlib.escape(report_id)}</title>"
+            "<h1>QML noise limitations report</h1>"
+            "<p>Paired local simulator evidence; no quantum-advantage or error-correction "
+            "claim.</p><table><tr><th>Mode</th><th>Seed</th><th>F1</th>"
+            f"<th>Delta from ideal</th></tr>{rows}</table>"
+            f"<h2>Findings</h2><ul>{findings}</ul>"
+            f"<h2>Limitations</h2><ul>{limitations}</ul></html>"
+        )
+
+    @application.get("/api/v1/integration/workflow-contract", tags=["integration"])
+    def integration_contract() -> dict[str, Any]:
+        return workflow_integration_contract()
 
     @application.post("/api/v1/evidence/imports", tags=["evidence"])
     def import_evidence(

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paths.example/contracts/qml/noise-profile.schema.json",
+  "title": "NoiseProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile_id", "execution_mode", "backend", "shots", "depolarizing_strength", "readout_error", "mitigation_id"],
+  "properties": {
+    "schema_version": {"const": "qml.noise-profile.v1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "execution_mode": {"enum": ["ideal", "shot-based", "noisy", "mitigated"]},
+    "backend": {"type": "string", "minLength": 1},
+    "shots": {"type": "integer", "minimum": 0, "maximum": 2048},
+    "depolarizing_strength": {"type": "number", "minimum": 0, "maximum": 0.25},
+    "readout_error": {"type": "number", "minimum": 0, "exclusiveMaximum": 0.2},
+    "mitigation_id": {"type": ["string", "null"]}
+  }
+}

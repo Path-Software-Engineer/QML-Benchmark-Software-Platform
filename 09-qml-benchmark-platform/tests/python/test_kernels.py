@@ -51,7 +51,11 @@ def test_protocol_rejects_unbounded_or_unpaired_configuration() -> None:
 
 @pytest.mark.parametrize(
     "filename",
-    ["p50-kernel-benchmark.pointer.json", "p51-vqc-qsvm-comparison.pointer.json"],
+    [
+        "p50-kernel-benchmark.pointer.json",
+        "p51-vqc-qsvm-comparison.pointer.json",
+        "p52-vqe-qaoa-optimization.pointer.json",
+    ],
 )
 def test_sealed_ai_evidence_pointers_are_accepted_idempotently(filename: str) -> None:
     bundle = json.loads((ROOT / "data/evidence" / filename).read_text(encoding="utf-8"))
